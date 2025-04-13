@@ -1,0 +1,55 @@
+import os
+import telegram
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask
+import threading
+
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+CHAT_ID = os.getenv('CHAT_ID')
+
+bot = telegram.Bot(token=BOT_TOKEN)
+
+message = """
+It’s Signal Check time, Kisha. No filters, no fluff.
+You’re here to grow, not coast.
+
+Step 1: Score yourself (1–5)
+- Executed even when it wasn’t perfect?
+- Tested in public, not just planned?
+- Posted to build your name?
+- Collaborated or delegated?
+- Made a bold ask or pitch?
+
+Step 2: Reflect
+- What did I *ship* this week?
+- What did I *test* (even if it flopped)?
+- What was my boldest moment?
+- What did I do even when it felt hard?
+
+Step 3: Align
+- What’s 1 thing I’ll post—even messy?
+- What fear will I lean into?
+- Who do I need to call in, partner with, or pitch?
+
+Then open your Trello board & log it all in.
+Clarity comes from motion. Go lead bold.
+"""
+
+def send_reminder():
+    bot.send_message(chat_id=CHAT_ID, text=message)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(send_reminder, 'cron', day_of_week='sun', hour=19, minute=0)
+scheduler.start()
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running."
+
+def run_flask():
+    app.run(host='0.0.0.0', port=10000)
+
+if __name__ == '__main__':
+    threading.Thread(target=run_flask).start()
